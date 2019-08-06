@@ -1,26 +1,44 @@
 import React from 'react';
-import logo from './logo.svg';
 import './App.css';
+import { HashRouter as Router, Route, NavLink } from 'react-router-dom';
+import Index from './view/index';
+import Webrtc from './view/webrtc/index';
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+	return (
+		<Router>
+			<div className="App">
+				<ul className="nav">
+					<li>
+						<NavLink
+							to="/"
+							exact
+							activeStyle={{
+								fontWeight: 'bold',
+								color: 'blue'
+							}}
+						>
+							介绍webrtc
+						</NavLink>
+					</li>
+					<li>
+						<NavLink
+							to="/webrtc"
+							activeStyle={{
+								fontWeight: 'bold',
+								color: 'blue'
+							}}
+						>
+							Webrtc
+						</NavLink>
+					</li>
+				</ul>
+
+				<Route path="/" exact component={Index} />
+				<Route path="/webrtc" component={Webrtc} />
+			</div>
+		</Router>
+	);
 }
 
 export default App;
