@@ -72,6 +72,19 @@ button[disabled]:hover {
   width: 220px;
 }
 
+.video-list canvas {
+  width: 220px;
+}
+
+.btns {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.btns button {
+  margin-right: 20px;
+}
+
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);

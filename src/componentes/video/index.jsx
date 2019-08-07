@@ -7,13 +7,17 @@ export default class Video extends Component {
 
 	componentDidUpdate() {
 		this.video.srcObject = this.props.media;
-	}
+  }
+  
+  getVideoRef() {
+    return this.video;
+  }
 
 	render() {
 		return (
 			<div>
 				<video
-					autoPlay
+          autoPlay
 					playsInline
 					ref={video => {
 						this.video = video;
