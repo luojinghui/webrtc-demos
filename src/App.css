@@ -79,11 +79,18 @@ button[disabled]:hover {
 .btns {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
 }
 .btns button {
   margin-right: 20px;
 }
+
+.select .audio-input, 
+.select .audio-output, 
+.select .video-source {
+  text-align: left;
+  padding: 5px 0;
+} 
 
 @keyframes App-logo-spin {
   from {

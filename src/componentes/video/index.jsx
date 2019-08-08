@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 
 export default class Video extends Component {
-	componentDidMount() {
+  componentDidMount() {
 		this.video.srcObject = this.props.media;
 	}
 

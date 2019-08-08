@@ -14,7 +14,10 @@ export default class Webrtc extends Component {
 		super(props);
 
 		this.state = {
-			videos: []
+			videos: [],
+			audioInputList: [],
+			audioOutputList: [],
+			videoInList: []
 		};
 
 		this.handleSuccess = this.handleSuccess.bind(this);
@@ -58,19 +61,50 @@ export default class Webrtc extends Component {
 		this.setState({
 			videos: [stream]
 		});
-  }
-  
-  async componentDidMount() {
-    const devices = await navigator.mediaDevices.enumerateDevices();
+	}
 
-    console.log("devices: ", devices);
-  }
+	async componentDidMount() {
+		const devices = await navigator.mediaDevices.enumerateDevices();
+		const audioInputList = [];
+		const audioOutputList = [];
+		const videoInList = [];
+
+		for (let i = 0; i < devices.length; i++) {
+			const deviceInfo = devices[i];
+			let item = {
+				value: deviceInfo.deviceId
+			};
+
+			if (deviceInfo.kind === 'audioinput') {
+				item.text = deviceInfo.label || `microphone ${audioInputList.length + 1}`;
+
+				audioInputList.push(item);
+
+			} else if (deviceInfo.kind === 'audiooutput') {
+				item.text = deviceInfo.label || `speaker ${audioOutputList.length + 1}`;
+
+				audioOutputList.push(item);
+			} else if (deviceInfo.kind === 'videoinput') {
+				item.text = deviceInfo.label || `camera ${videoInList.length + 1}`;
+
+				videoInList.push(item);
+			} else {
+				console.log('Some other kind of source/device: ', deviceInfo);
+			}
+		}
+
+		this.setState({
+			audioInputList,
+			audioOutputList,
+			videoInList
+		});
+	}
 
 	onSnapshot() {
 		try {
 			const canvas = this.canvas;
-      const video = this.video && this.video.getVideoRef();
-      
+			const video = this.video && this.video.getVideoRef();
+
 			if (video) {
 				canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
 			}
@@ -80,6 +114,8 @@ export default class Webrtc extends Component {
 	}
 
 	render() {
+		const { audioInputList, audioOutputList, videoInList } = this.state;
+
 		return (
 			<div className="container">
 				<div className="video-list">
@@ -93,17 +129,40 @@ export default class Webrtc extends Component {
 					<button onClick={this.onHandleOpenCamera}>Open camera</button>
 					<button onClick={this.onSnapshot}>take snapshot</button>
 				</div>
-        <div className="select">
-          <div className="audio-input">
-            Audio input source:
-          </div>
-          <div className="audio-output">
-            Audio output source:
-          </div>
-          <div className="video-source">
-            Video source:
-          </div>
-        </div>
+				<div className="select">
+					<div className="audio-input">
+						<label>Audio input source:</label>
+						<select>
+							{audioInputList.map(item => (
+								<option key={item.value} value={item.value}>
+									{item.text}
+								</option>
+							))}
+						</select>
+					</div>
+
+					<div className="audio-output">
+						<label>Audio output source:</label>
+						<select>
+							{audioOutputList.map(item => (
+								<option key={item.value} value={item.value}>
+									{item.text}
+								</option>
+							))}
+						</select>
+					</div>
+
+					<div className="video-source">
+						<label>Video source:</label>
+						<select>
+							{videoInList.map(item => (
+								<option key={item.value} value={item.value}>
+									{item.text}
+								</option>
+							))}
+						</select>
+					</div>
+				</div>
 			</div>
 		);
 	}
