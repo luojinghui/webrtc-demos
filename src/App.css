@@ -68,8 +68,10 @@ button[disabled]:hover {
   display: flex;
 }
 
-.video-list video {
+.video-list video,
+.video-list .video {
   width: 220px;
+  height: 123px;
 }
 
 .video-list canvas {

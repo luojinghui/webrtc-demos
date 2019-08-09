@@ -15,7 +15,7 @@ export default class Video extends Component {
 
 	render() {
 		return (
-			<div>
+			<div className="video">
 				<video
           autoPlay
 					playsInline

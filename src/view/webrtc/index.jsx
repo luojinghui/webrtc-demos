@@ -1,13 +1,6 @@
 import React, { Component } from 'react';
+import 'webrtc-adapter';
 import Video from '../../componentes/video';
-
-const constraints = (window.constraints = {
-	audio: false,
-	video: {
-		aspectRatio: 1.778,
-		resizeMode: 'crop-and-scale'
-	}
-});
 
 export default class Webrtc extends Component {
 	constructor(props) {
@@ -17,17 +10,38 @@ export default class Webrtc extends Component {
 			videos: [],
 			audioInputList: [],
 			audioOutputList: [],
-			videoInList: []
+			videoInList: [],
+			selectAudioInputValue: '',
+			selectAudioOutputValue: '',
+			selectvideoInValue: ''
 		};
 
 		this.handleSuccess = this.handleSuccess.bind(this);
 		this.onHandleOpenCamera = this.onHandleOpenCamera.bind(this);
 		this.onSnapshot = this.onSnapshot.bind(this);
+		this.onChangeAudioInput = this.onChangeAudioInput.bind(this);
+		this.onChangeVideoInput = this.onChangeVideoInput.bind(this);
+		this.onChangeAudioOutput = this.onChangeAudioOutput.bind(this);
+	}
+
+	get constraints() {
+		const { selectAudioInputValue, selectvideoInValue } = this.state;
+
+		return {
+			audio: {
+				deviceId: selectAudioInputValue ? { exact: selectAudioInputValue } : undefined
+			},
+			video: {
+				deviceId: selectvideoInValue ? { exact: selectvideoInValue } : undefined,
+				aspectRatio: 1.778,
+				resizeMode: 'crop-and-scale'
+			}
+		};
 	}
 
 	handleError(error) {
 		if (error.name === 'ConstraintNotSatisfiedError') {
-			let v = constraints.video;
+			let v = this.constraints.video;
 			console.log(`The resolution ${v.width.exact}x${v.height.exact} px is not supported by your device.`);
 		} else if (error.name === 'PermissionDeniedError') {
 			console.log(
@@ -42,8 +56,10 @@ export default class Webrtc extends Component {
 	async onHandleOpenCamera(e) {
 		try {
 			// MediaDevices 是一个单例对象。通常，您只需直接使用此对象的成员，例如通过调用
-			const stream = await navigator.mediaDevices.getUserMedia(constraints);
+			const stream = await navigator.mediaDevices.getUserMedia(this.constraints);
 			this.handleSuccess(stream);
+
+			console.log('windowstram: ', window.stream);
 		} catch (e) {
 			this.handleError(e);
 		}
@@ -63,41 +79,51 @@ export default class Webrtc extends Component {
 		});
 	}
 
-	async componentDidMount() {
-		const devices = await navigator.mediaDevices.enumerateDevices();
-		const audioInputList = [];
-		const audioOutputList = [];
-		const videoInList = [];
+	componentDidMount() {
+		this.initDevices();
+	}
 
-		for (let i = 0; i < devices.length; i++) {
-			const deviceInfo = devices[i];
-			let item = {
-				value: deviceInfo.deviceId
-			};
+	async initDevices() {
+		try {
+			const devices = await navigator.mediaDevices.enumerateDevices();
+			const audioInputList = [];
+			const audioOutputList = [];
+			const videoInList = [];
 
-			if (deviceInfo.kind === 'audioinput') {
-				item.text = deviceInfo.label || `microphone ${audioInputList.length + 1}`;
+			for (let i = 0; i < devices.length; i++) {
+				const deviceInfo = devices[i];
+				let item = {
+					value: deviceInfo.deviceId
+				};
 
-				audioInputList.push(item);
+				if (deviceInfo.kind === 'audioinput') {
+					item.text = deviceInfo.label || `microphone ${audioInputList.length + 1}`;
 
-			} else if (deviceInfo.kind === 'audiooutput') {
-				item.text = deviceInfo.label || `speaker ${audioOutputList.length + 1}`;
+					audioInputList.push(item);
+				} else if (deviceInfo.kind === 'audiooutput') {
+					item.text = deviceInfo.label || `speaker ${audioOutputList.length + 1}`;
 
-				audioOutputList.push(item);
-			} else if (deviceInfo.kind === 'videoinput') {
-				item.text = deviceInfo.label || `camera ${videoInList.length + 1}`;
+					audioOutputList.push(item);
+				} else if (deviceInfo.kind === 'videoinput') {
+					item.text = deviceInfo.label || `camera ${videoInList.length + 1}`;
 
-				videoInList.push(item);
-			} else {
-				console.log('Some other kind of source/device: ', deviceInfo);
+					videoInList.push(item);
+				} else {
+					console.log('Some other kind of source/device: ', deviceInfo);
+				}
 			}
-		}
 
-		this.setState({
-			audioInputList,
-			audioOutputList,
-			videoInList
-		});
+			this.setState({
+				audioInputList,
+				audioOutputList,
+				videoInList,
+				selectAudioInputValue: audioInputList[0].value,
+				selectAudioOutputValue: audioOutputList[0] ? audioOutputList[0].value : "",
+				selectvideoInValue: videoInList[0].value
+			});
+		} catch (error) {
+			console.log('navigator.MediaDevices.getUserMedia error: ', error);
+		}
 	}
 
 	onSnapshot() {
@@ -113,8 +139,72 @@ export default class Webrtc extends Component {
 		}
 	}
 
+	onChangeAudioInput(e) {
+		if (this.state.selectAudioInputValue !== e.target.value) {
+			this.setState(
+				{
+					selectAudioInputValue: e.target.value
+				},
+				() => {
+					this.onHandleOpenCamera({});
+				}
+			);
+		}
+	}
+
+	onChangeVideoInput(e) {
+		if (this.state.selectvideoInValue !== e.target.value) {
+			this.setState(
+				{
+					selectvideoInValue: e.target.value
+				},
+				() => {
+					this.onHandleOpenCamera({});
+				}
+			);
+		}
+	}
+
+	async attachSinkId() {
+    const element = this.video && this.video.getVideoRef();
+    const { selectAudioOutputValue: sinkId } = this.state;
+
+		if (typeof element.sinkId !== 'undefined') {
+			try {
+				const result = await element.setSinkId(sinkId);
+
+				console.log('result: ', result);
+				if (result) {
+					console.log(`Success, audio output device attached: ${sinkId}`);
+				}
+			} catch (error) {
+				let errorMessage = error;
+
+				if (error.name === 'SecurityError') {
+					errorMessage = `You need to use HTTPS for selecting audio output device: ${error}`;
+				}
+				console.error(errorMessage);
+			}
+		} else {
+			console.warn('Browser does not support output device selection.');
+		}
+  }
+  
+  onChangeAudioOutput(e) {
+		if (this.state.selectAudioOutputValue !== e.target.value) {
+			this.setState(
+				{
+					selectAudioOutputValue: e.target.value
+				},
+				() => {
+					this.attachSinkId();
+				}
+			);
+		}    
+  }
+
 	render() {
-		const { audioInputList, audioOutputList, videoInList } = this.state;
+		const { audioInputList, audioOutputList, videoInList, selectAudioInputValue, selectvideoInValue, selectAudioOutputValue } = this.state;
 
 		return (
 			<div className="container">
@@ -132,7 +222,7 @@ export default class Webrtc extends Component {
 				<div className="select">
 					<div className="audio-input">
 						<label>Audio input source:</label>
-						<select>
+						<select onChange={this.onChangeAudioInput} value={selectAudioInputValue}>
 							{audioInputList.map(item => (
 								<option key={item.value} value={item.value}>
 									{item.text}
@@ -143,7 +233,7 @@ export default class Webrtc extends Component {
 
 					<div className="audio-output">
 						<label>Audio output source:</label>
-						<select>
+						<select onChange={this.onChangeAudioOutput} value={ selectAudioOutputValue }>
 							{audioOutputList.map(item => (
 								<option key={item.value} value={item.value}>
 									{item.text}
@@ -154,7 +244,8 @@ export default class Webrtc extends Component {
 
 					<div className="video-source">
 						<label>Video source:</label>
-						<select>
+						<select onChange={this.onChangeVideoInput} value={selectvideoInValue}>
+							>
 							{videoInList.map(item => (
 								<option key={item.value} value={item.value}>
 									{item.text}
