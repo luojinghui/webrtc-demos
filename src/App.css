@@ -70,12 +70,13 @@ button[disabled]:hover {
 
 .video-list video,
 .video-list .video {
-  width: 220px;
-  height: 123px;
+  background: none;
+  height: auto;
+  width: auto;
 }
 
 .video-list canvas {
-  width: 220px;
+  /* width: 220px; */
 }
 
 .btns {
