@@ -29,6 +29,7 @@ export default class Webrtc extends Component {
     this.stream = null;
 	}
 
+  // GET 获取constraints
 	constraints(videoObj = {}) {
 		const { selectAudioInputValue, selectvideoInValue } = this.state;
 
@@ -45,6 +46,7 @@ export default class Webrtc extends Component {
 		};
   }
 
+  // 异常处理函数
 	handleError(error) {
 		if (error.name === 'ConstraintNotSatisfiedError') {
 			let v = this.constraints().video;
@@ -59,6 +61,7 @@ export default class Webrtc extends Component {
 		console.log(`getUserMedia error: ${error.name}`, error);
 	}
 
+  // 开启摄像头
 	async onHandleOpenCamera(e) {
     if (this.stream) {
       this.stream.getTracks().forEach(track => {
@@ -76,6 +79,7 @@ export default class Webrtc extends Component {
 		}
   }
   
+  // 获取Media对象
   async getMedia(constraints) {
     if (this.stream) {
       this.stream.getTracks().forEach(track => {
@@ -89,6 +93,7 @@ export default class Webrtc extends Component {
     this.handleSuccess(stream);
   }
 
+  // 获取Stream流成功后的函数
 	handleSuccess(stream) {
 		const videoTracks = stream.getVideoTracks();
 		const audioTracks = stream.getAudioTracks();
@@ -110,6 +115,7 @@ export default class Webrtc extends Component {
 		this.initDevices();
 	}
 
+  // 初始化音视频设备list
 	async initDevices() {
 		try {
 			const devices = await navigator.mediaDevices.enumerateDevices();
@@ -153,6 +159,7 @@ export default class Webrtc extends Component {
 		}
 	}
 
+  // 截屏
 	onSnapshot() {
 		try {
 			const canvas = this.canvas;
@@ -166,6 +173,7 @@ export default class Webrtc extends Component {
 		}
 	}
 
+  // change 音频输入
 	onChangeAudioInput(e) {
 		if (this.state.selectAudioInputValue !== e.target.value) {
 			this.setState(
@@ -185,6 +193,7 @@ export default class Webrtc extends Component {
 		}
 	}
 
+  // change 视频输入设备
 	onChangeVideoInput(e) {
 		if (this.state.selectvideoInValue !== e.target.value) {
 			this.setState(
@@ -204,6 +213,7 @@ export default class Webrtc extends Component {
 		}
 	}
 
+  // change 音频输入设备
 	async attachSinkId() {
 		const element = this.video && this.video.getVideoRef();
 		const { selectAudioOutputValue: sinkId } = this.state;
@@ -229,6 +239,7 @@ export default class Webrtc extends Component {
 		}
 	}
 
+  // change 音频输入
 	onChangeAudioOutput(e) {
 		if (this.state.selectAudioOutputValue !== e.target.value) {
 			this.setState(
@@ -242,6 +253,7 @@ export default class Webrtc extends Component {
 		}
 	}
 
+  // 改变分辨率
 	onHandleChangeResolution(type) {
     console.log('type: ', type);
     const resolutionMap = {
@@ -273,6 +285,7 @@ export default class Webrtc extends Component {
 
   }
   
+  // 停止画面
   onHandleStop() {
     if(this.state.localMedia) {
       const track = this.state.localMedia.getVideoTracks()[0];
