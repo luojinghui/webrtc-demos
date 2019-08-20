@@ -162,8 +162,11 @@ export default class Webrtc extends Component {
   // 截屏
 	onSnapshot() {
 		try {
-			const canvas = this.canvas;
-			const video = this.video && this.video.getVideoRef();
+      const canvas = this.canvas;
+      const video = this.video && this.video.getVideoRef();
+      
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
 
 			if (video) {
 				canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
