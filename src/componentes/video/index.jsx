@@ -14,9 +14,12 @@ export default class Video extends Component {
   }
 
 	render() {
+    const { control = false } = this.props;
+
 		return (
 			<div className="video">
 				<video
+          controls={control}
           autoPlay
 					playsInline
 					ref={video => {
