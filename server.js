@@ -41,6 +41,8 @@ io.on('connect', function(socket) {
 
   socket.on('message', function(data) {
     var data = JSON.parse(data);
+
+    console.log("data: ", data);
     switch (data.event) {
       case 'get_room_info':
         socket.emit(

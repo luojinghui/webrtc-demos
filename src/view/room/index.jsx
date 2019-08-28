@@ -129,7 +129,8 @@ class Room extends Component {
         
         console.log("pc: ", pc);
 
-				pc.addStream(localStream);
+				// pc.addStream(localStream);
+        localStream.getTracks().forEach((track) => pc.addTrack(track, localStream));
 			}
 		}
 	}
@@ -199,6 +200,7 @@ class Room extends Component {
 	createPeerConnection(name) {
 		const pc = (peerConn[name] = new RTCPeerConnection(configuration));
 
+    // 监听 B 的ICE候选信息 如果收集到，就添加给 A
 		pc.onicecandidate = event => {
 			setTimeout(() => {
 				if (event.candidate) {
@@ -223,8 +225,10 @@ class Room extends Component {
 	}
 
 	addStreams() {
+    const addTrack = (connection) => localStream.getTracks().forEach((track) => peerConn[connection].addTrack(track, localStream));
+
 		for (let connection in peerConn) {
-			peerConn[connection].addStream(localStream);
+      addTrack(connection);
 		}
 	}
 
