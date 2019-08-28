@@ -1,4 +1,5 @@
 var express = require('express');
+var compression = require('compression');
 var app = express();
 var https = require('https');
 var fs = require('fs');
@@ -16,6 +17,7 @@ var pub = redisClient(6379, '127.0.0.1');
 var sub = redisClient(6379, '127.0.0.1');
 
 app.use(express.static('build'));
+app.use(compression());
 var server = https.createServer(options, app).listen({
   port: API_PORT,
 });
