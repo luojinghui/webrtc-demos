@@ -136,3 +136,29 @@ textarea {
 	width: 100px;
 	margin-right: 20px;
 }
+
+
+.left {
+  text-align: left;
+}
+.left h3 {
+  margin-top: 20px;
+}
+#local,
+#remoteVideo {
+  display: flex;
+  align-items: flex-start;
+}
+
+#remoteVideo video {
+  width: 25%;
+  padding: 10px 10px 0 0;
+}
+
+.list-group {
+  text-align: left;
+}
+
+ul li {
+  list-style: none;
+}

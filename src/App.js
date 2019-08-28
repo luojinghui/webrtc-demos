@@ -6,8 +6,15 @@ import Webrtc from './view/webrtc/index';
 import TransText from './view/transText/index';
 import BaseConnection from './view/baseConnection/index';
 import AdjustBandWidth from './view/adjustBandWidth/index';
+import Room from './view/room/index';
 
 function App() {
+  const isActive = (match, location) => {
+    const { pathname } = location;
+    
+    return (pathname === "/" || pathname.includes("/room"));
+  }
+
 	return (
 		<Router>
 			<div className="App">
@@ -20,8 +27,9 @@ function App() {
 								fontWeight: 'bold',
 								color: 'blue'
 							}}
+              isActive={isActive}
 						>
-							介绍webrtc
+							rtc 多点呼叫
 						</NavLink>
 					</li>
 					<li>
@@ -32,7 +40,7 @@ function App() {
 								color: 'blue'
 							}}
 						>
-							Webrtc
+							snapshat/清晰度
 						</NavLink>
 					</li>
           <li>
@@ -54,7 +62,7 @@ function App() {
 								color: 'blue'
 							}}
 						>
-							baseConnection
+							basePeerConnection
 						</NavLink>
 					</li>
           <li>
@@ -75,6 +83,7 @@ function App() {
 				<Route path="/transText" component={TransText} />
 				<Route path="/baseConnection" component={BaseConnection} />
 				<Route path="/adjustBandWidth" component={AdjustBandWidth} />
+				<Route path="/room/:room" component={Room} />
 			</div>
 		</Router>
 	);
