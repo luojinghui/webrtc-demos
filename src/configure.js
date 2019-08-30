@@ -9,4 +9,14 @@ const DEFAULT_ICE_SERVER = {
   username: 'zmecust',
 };
 
+// var iceServer = {
+//     "iceServers": [{
+//         "urls" : ["stun:stun.l.google.com:19302"]
+//     }, {
+//         "urls" : ["turn:numb.viagenie.ca"],
+//         "username" : "webrtc@live.com",
+//         "credential" : "muazkh"
+//     }]
+// };
+
 module.exports = { API_PORT, API_ROOT, DEFAULT_ICE_SERVER };

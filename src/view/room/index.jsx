@@ -282,10 +282,12 @@ class Room extends Component {
 								<li className="list-group-item">在线用户: { JSON.stringify(users) }</li>
 							</ul>
 						</Col>
-						<Col xs={24} sm={16}>
+						<Col xs={24} sm={17}>
+              <h3>local video: </h3>
 							<div id="local">
 								<video id="localVideo" autoPlay />
 							</div>
+              <h3>remote video: </h3>
 							<div id="remoteVideo" />
 						</Col>
 					</Row>
