@@ -144,11 +144,16 @@ textarea {
 .left h3 {
   margin-top: 20px;
 }
-#local,
-#remoteVideo {
+
+#local {
   display: flex;
   align-items: flex-start;
   flex-direction: column;
+}
+
+#remoteVideo {
+  display: flex;
+  flex-wrap: wrap;
 }
 
 #local video {
@@ -156,8 +161,10 @@ textarea {
 }
 
 #remoteVideo video {
-  width: 100%;
+  /* width: 100%; */
+  width: 50%;
   padding: 10px 0px 0 0;
+  height: intrinsic;
 }
 
 .list-group {

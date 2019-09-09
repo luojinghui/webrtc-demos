@@ -4,7 +4,6 @@ import { message, Form, Icon, Input, Button, Row, Col } from 'antd';
 import socketIOClient from 'socket.io-client';
 import * as config from '../../configure';
 
-const socket = socketIOClient(config.API_ROOT);
 const configuration = {
   iceServers: [config.DEFAULT_ICE_SERVER],
   sdpSemantics: "unified-plan"
@@ -28,7 +27,9 @@ class Room extends Component {
 	}
 
 	componentDidMount() {
-		socket.on('message', data => {
+    this.socket = socketIOClient(config.API_ROOT);
+
+		this.socket.on('message', data => {
 			console.log(data);
 
 			switch (data.event) {
@@ -57,20 +58,27 @@ class Room extends Component {
   }
   
   componentWillUnmount() {
-
+    this.socket.close();
+    console.log("this.socket close");
   }
 
 	handleLeave(data) {
 		message.info('用户' + data.name + '已退出');
 
-		this.users = data.users;
+    this.setState({
+      users: data.users
+    })
 		// Remove video src for the exist user
-    var video = document.getElementById(`remote_video_${data.name}`);
-		video && video.parentNode && video.parentNode.removeChild(video);
-		var pc = peerConn[data.name];
-		pc.close();
-		pc.onicecandidate = null;
-		pc.ontrack = null;
+    const video = document.getElementById(`remote_video_${data.name}`);
+    video && video.parentNode && video.parentNode.removeChild(video);
+    
+    const pc = peerConn[data.name];
+
+    if(pc) {
+      pc.close();
+      pc.onicecandidate = null;
+      pc.ontrack = null;
+    } 
 	}
 
 	handleMsg(data) {
@@ -106,7 +114,7 @@ class Room extends Component {
 	}
 
 	send(message) {
-		socket.send(JSON.stringify(message));
+		this.socket.send(JSON.stringify(message));
 	}
 
 	handleLogin(data) {
@@ -140,7 +148,12 @@ class Room extends Component {
 		const { users, name } = this.state;
 		// New webrtc API
 		try {
-			const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
+			const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: {
+        aspectRatio: 1.778,
+        resizeMode: 'crop-and-scale',
+        width: {exact: 640}, 
+        height: {exact: 480}
+      } });
 			const video = document.getElementById('localVideo');
 
 			this.addVideoURL('localVideo', stream);
@@ -231,6 +244,7 @@ class Room extends Component {
         child.autoplay = 'autoplay';
         child.srcObject = e.streams[0];
         document.getElementById('remoteVideo').appendChild(child);
+        console.log("track getsetting: ", e.track.getSettings());
 
       }
 			// const child = document.createElement('video');
@@ -302,12 +316,13 @@ class Room extends Component {
 							</ul>
 						</Col>
 						<Col xs={24} sm={17}>
+              <h3>remote video: </h3>
+							<div id="remoteVideo" />
+
               <h3>local video: </h3>
 							<div id="local">
 								<video id="localVideo" autoPlay />
 							</div>
-              <h3>remote video: </h3>
-							<div id="remoteVideo" />
 						</Col>
 					</Row>
 				</div>

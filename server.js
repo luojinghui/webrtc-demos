@@ -21,7 +21,7 @@ app.use(compression());
 var server = https.createServer(options, app).listen({
   port: API_PORT,
 });
-console.log('The HTTPS server is up and running');
+console.log('The HTTPS server is up and running', API_PORT);
 
 var io = IO(server);
 
@@ -149,6 +149,8 @@ io.on('connect', function(socket) {
 
   socket.on('disconnect', function() {
     if (socket.name) {
+      console.log("disconnect: ", socket.name);
+      
       try {
         roomSockets[roomID].splice(roomSockets[roomID].indexOf(socket));
         roomUsers[roomID].splice(roomUsers[roomID].indexOf(socket.name));
