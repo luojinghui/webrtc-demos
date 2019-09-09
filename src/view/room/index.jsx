@@ -6,7 +6,8 @@ import * as config from '../../configure';
 
 const socket = socketIOClient(config.API_ROOT);
 const configuration = {
-	iceServers: [config.DEFAULT_ICE_SERVER]
+  iceServers: [config.DEFAULT_ICE_SERVER],
+  sdpSemantics: "unified-plan"
 };
 let localStream;
 const peerConn = [];
@@ -64,12 +65,12 @@ class Room extends Component {
 
 		this.users = data.users;
 		// Remove video src for the exist user
-		var video = document.getElementById(`remote_video_${data.name}`);
-		video.parentNode.removeChild(video);
+    var video = document.getElementById(`remote_video_${data.name}`);
+		video && video.parentNode && video.parentNode.removeChild(video);
 		var pc = peerConn[data.name];
 		pc.close();
 		pc.onicecandidate = null;
-		pc.onaddstream = null;
+		pc.ontrack = null;
 	}
 
 	handleMsg(data) {
@@ -198,8 +199,8 @@ class Room extends Component {
 	}
 
 	createPeerConnection(name) {
-		const pc = (peerConn[name] = new RTCPeerConnection(configuration));
-
+    const pc = (peerConn[name] = new RTCPeerConnection(configuration));
+  
     // 监听 B 的ICE候选信息 如果收集到，就添加给 A
 		pc.onicecandidate = event => {
 			setTimeout(() => {
@@ -213,12 +214,30 @@ class Room extends Component {
 			});
 		};
 
-		pc.onaddstream = function(e) {
-			const child = document.createElement('video');
-			child.id = `remote_video_${name}`;
-			child.autoplay = 'autoplay';
-			child.srcObject = e.stream;
-			document.getElementById('remoteVideo').appendChild(child);
+		// pc.onaddstream = function(e) {
+    //   console.log("add stream: ", e);
+    //         const child = document.createElement('video');
+    //         child.id = `remote_video_${name}`;
+    //         child.autoplay = 'autoplay';
+    //         child.srcObject = e.stream;
+    //         document.getElementById('remoteVideo').appendChild(child);
+		// };
+
+    pc.ontrack = function(e) {
+      console.log("on track: ", e);
+      if(e.track.kind === "video") {
+        const child = document.createElement('video');
+        child.id = `remote_video_${name}`;
+        child.autoplay = 'autoplay';
+        child.srcObject = e.streams[0];
+        document.getElementById('remoteVideo').appendChild(child);
+
+      }
+			// const child = document.createElement('video');
+			// child.id = `remote_video_${name}`;
+			// child.autoplay = 'autoplay';
+			// child.srcObject = e.stream;
+			// document.getElementById('remoteVideo').appendChild(child);
 		};
 
 		return pc;
