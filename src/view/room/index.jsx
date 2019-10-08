@@ -9,6 +9,9 @@ const configuration = {
   sdpSemantics: "unified-plan"
 };
 let localStream;
+let screenStream;
+let cloneLocalStream;
+let captureStream;
 const peerConn = [];
 
 class Room extends Component {
@@ -86,6 +89,8 @@ class Room extends Component {
 	}
 
 	handleAnswer(data) {
+    console.log("remote answer: ", data.answer);
+
 		peerConn[data.name].setRemoteDescription(new RTCSessionDescription(data.answer));
 	}
 
@@ -94,7 +99,9 @@ class Room extends Component {
 	}
 
 	handleOffer(data) {
-		const pc = peerConn[data.name];
+    const pc = peerConn[data.name];
+    
+    console.log("remote offer: ", data.offer);
 
 		pc.setRemoteDescription(new RTCSessionDescription(data.offer));
 		// Create an answer to an offer
@@ -138,8 +145,10 @@ class Room extends Component {
         
         console.log("pc: ", pc);
 
-				// pc.addStream(localStream);
+        // const cloneMedia = localStream.clone();
+
         localStream.getTracks().forEach((track) => pc.addTrack(track, localStream));
+        cloneLocalStream.getTracks().forEach((track) => pc.addTrack(track, cloneLocalStream));
 			}
 		}
 	}
@@ -151,14 +160,56 @@ class Room extends Component {
 			const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: {
         aspectRatio: 1.778,
         resizeMode: 'crop-and-scale',
-        width: {exact: 640}, 
+        width: {exact: 640},
         height: {exact: 480}
       } });
-			const video = document.getElementById('localVideo');
 
-			this.addVideoURL('localVideo', stream);
+
+      // if (navigator.mediaDevices.getDisplayMedia) {
+      //   captureStream = await navigator.mediaDevices.getDisplayMedia({video: {mediaSource: 'screen'}})
+      // } else if(navigator.getDisplayMedia)  {
+      //   captureStream = await navigator.getDisplayMedia({video: {mediaSource: 'screen'}})
+      // }      
+
+			const video = document.getElementById('localVideo');
+			// const screenVideo = document.getElementById('screenVideo');
+
+      this.addVideoURL('localVideo', stream);
+      // if(captureStream) {
+      //   this.addVideoURL('screenVideo', captureStream);
+      // }
+      
 			video.muted = true;
-			localStream = stream;
+      // screenVideo.muted = true;
+      
+      // if(captureStream) {
+      //   screenStream = captureStream;
+      // }
+      // console.log("screenStream: ", screenStream);
+      
+      localStream = stream;
+      
+      cloneLocalStream = stream.clone();
+
+      console.log("localStream: ", localStream);
+      console.log("cloneLocalStream: ", cloneLocalStream);
+
+      const track = cloneLocalStream.getVideoTracks()[0];
+
+      console.log("cloneLocalStream track: ", track);
+
+      const res = await track.applyConstraints({
+        audio: true,
+        video: {
+          aspectRatio: 1.778,
+          resizeMode: 'crop-and-scale',
+          width: { min: 1024, ideal: 1280, max: 1920 },
+          height: { min: 776, ideal: 720, max: 1080 }
+        }
+      })
+
+      console.log("cloneLocalStream track 2: ", track, "  res: ", res);
+
 			if (users.length !== 1 && users[users.length - 1] === name) {
 				this.call();
 			}
@@ -237,7 +288,10 @@ class Room extends Component {
 		// };
 
     pc.ontrack = function(e) {
-      console.log("on track: ", e);
+      console.log("-------------");
+      console.log("on track: ", e.streams);
+      console.log("-------------");
+
       if(e.track.kind === "video") {
         const child = document.createElement('video');
         child.id = `remote_video_${name}`;
@@ -258,7 +312,13 @@ class Room extends Component {
 	}
 
 	addStreams() {
-    const addTrack = (connection) => localStream.getTracks().forEach((track) => peerConn[connection].addTrack(track, localStream));
+    const addTrack = (connection) => {
+      localStream.getTracks().forEach((track) => peerConn[connection].addTrack(track, localStream))
+      cloneLocalStream.getTracks().forEach((track) => peerConn[connection].addTrack(track, cloneLocalStream))
+      if(screenStream) {
+        screenStream.getTracks().forEach((track) => peerConn[connection].addTrack(track, screenStream))
+      }
+    };
 
 		for (let connection in peerConn) {
       addTrack(connection);
@@ -322,6 +382,9 @@ class Room extends Component {
               <h3>local video: </h3>
 							<div id="local">
 								<video id="localVideo" autoPlay />
+							</div>
+							<div id="screen">
+								<video id="screenVideo" autoPlay />
 							</div>
 						</Col>
 					</Row>

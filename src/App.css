@@ -145,7 +145,7 @@ textarea {
   margin-top: 20px;
 }
 
-#local {
+#local, #screenVideo {
   display: flex;
   align-items: flex-start;
   flex-direction: column;
@@ -156,7 +156,7 @@ textarea {
   flex-wrap: wrap;
 }
 
-#local video {
+#local video, #screenVideo video, #screen video {
   width: 100%;
 }
 
