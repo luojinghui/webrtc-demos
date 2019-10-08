@@ -191,8 +191,8 @@ class Room extends Component {
       
       cloneLocalStream = stream.clone();
 
-      console.log("localStream: ", localStream);
-      console.log("cloneLocalStream: ", cloneLocalStream);
+      console.log("localStream: ", localStream.id);
+      console.log("cloneLocalStream: ", cloneLocalStream.id);
 
       const track = cloneLocalStream.getVideoTracks()[0];
 
@@ -289,7 +289,7 @@ class Room extends Component {
 
     pc.ontrack = function(e) {
       console.log("-------------");
-      console.log("on track: ", e.streams);
+      console.log("on track: ", e.streams[0].id);
       console.log("-------------");
 
       if(e.track.kind === "video") {
