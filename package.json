@@ -70,7 +70,7 @@
     "ws": "^3.1.0"
   },
   "devDependencies": {
-    "express": "^4.14.1"
+    "express": "^4.17.3"
   },
   "scripts": {
     "start": "node scripts/start.js",
